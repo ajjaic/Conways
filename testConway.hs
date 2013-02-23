@@ -3,16 +3,10 @@ import Data.List (partition)
 
 t1 = prntConwayb cbrd
 t2 = prntConwayb brdc
-t3 = let (f, s) = partition ((\fn -> fn forwrd) . (isCellin cbrd)) cbrdcells in mapM_ putStrLn $ (map (\c -> "Has front " ++ show c) f) ++ (map (\c -> "No front " ++ show c) s)
-t4 = let (f, s) = partition ((\fn -> fn forwrd) . (isCellin brdc)) brdccells in mapM_ putStrLn $ (map (\c -> "Has front " ++ show c) f) ++ (map (\c -> "No front " ++ show c) s)
-t5 = mapM_ putStrLn $ map (\(a,b) -> "Cell in front of " ++ show a ++ " is " ++ show b) $ zip cbrdcells (map (neigborF cbrd) cbrdcells) 
-t6 = mapM_ putStrLn $ map (\(a,b) -> "Cell in front of " ++ show a ++ " is " ++ show b) $ zip brdccells $ map (neigborF brdc) brdccells
-t7 = mapM_ putStrLn $ map (\(a,b) -> "Cell behind " ++ show a ++ " is " ++ show b) $ zip cbrdcells (map (neigborB cbrd) cbrdcells) 
-t8 = mapM_ putStrLn $ map (\(a,b) -> "Cell behind " ++ show a ++ " is " ++ show b) $ zip brdccells $ map (neigborB brdc) brdccells
-t9 = mapM_ putStrLn $ map (\(a,b) -> "Cell above " ++ show a ++ " is " ++ show b) $ zip cbrdcells (map (neigborU cbrd) cbrdcells) 
-t10 = mapM_ putStrLn $ map (\(a,b) -> "Cell above " ++ show a ++ " is " ++ show b) $ zip brdccells $ map (neigborU brdc) brdccells
-t11 = mapM_ putStrLn $ map (\(a,b) -> "Cell below " ++ show a ++ " is " ++ show b) $ zip cbrdcells (map (neigborD cbrd) cbrdcells) 
-t12 = mapM_ putStrLn $ map (\(a,b) -> "Cell below " ++ show a ++ " is " ++ show b) $ zip brdccells $ map (neigborD brdc) brdccells
+t3 = mapM_ putStrLn $ map (show . cellAliveNeighbors cbrd) cbrdcells
+t4 = mapM_ putStrLn $ map (show . cellAliveNeighbors brdc) brdccells
+t5 = prntConwayb $ nxtGen cbrd
+t6 = prntConwayb $ nxtGen brdc
 
 
 cbrd :: Conwayb
@@ -31,5 +25,5 @@ brdc = (concat [[Alive (1,1), Alive (1,2), Empty (1,3), Empty (1,4), Empty (1,5)
 
 tbrd1 = fst cbrd
 tbrd2 = fst brdc
-cbrdcells = [Alive (1,1), Alive (3,4), Empty (4,1), Empty (4,4), Empty (1,4), Alive (2,2), Alive (3,1)]
+cbrdcells = [Alive (1,1), Alive (3,4), Empty (4,1), Empty (4,4), Empty (1,4), Alive (2,2), Alive (3,1), Empty (1,3)]
 brdccells = [Alive (1,1), Empty (5,4), Empty (4,6), Empty (4,4), Empty (6,4), Empty (6,6), Empty (6,1)]

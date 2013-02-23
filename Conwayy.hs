@@ -1,13 +1,13 @@
 module Conwayy (
   prntConwayb
- ,neigborF, neigborB, neigborU, neigborD
- ,isCellin
+ ,cellAliveNeighbors
+ ,nxtGen
  ,forwrd ,bkwrd ,up ,down ,upf ,upb ,downf ,downb
- ,Cell (Alive, Empty)
- ,Conwayb
+ ,Cell (Alive, Empty) ,Conwayb ,Loc, Height
 ) where
 
 import Data.List (groupBy)
+import Data.Maybe (catMaybes)
 
 type Loc = (Int, Int)
 data Cell = Alive Loc | Empty Loc deriving (Show, Eq)
@@ -32,28 +32,51 @@ getLocation (Empty l) = l
 
 getCell :: Conwayb -> Cell -> Direction -> Cell
 getCell (b, h) c d = case d of 
-                                    "f" -> let a = (x, y+1) in head $ filter ((== a) . getLocation) b
-                                    "b" -> let a = (x, y-1) in head $ filter ((== a) . getLocation) b
-                                    "u" -> let a = (x-1, y) in head $ filter ((==a ) . getLocation) b
-                                    "d" -> let a = (x+1, y) in head $ filter ((== a) . getLocation) b
-  where (x,y) = getLocation c
+                                    "f" -> help (x, y+1) 
+                                    "b" -> help (x, y-1) 
+                                    "u" -> help (x-1, y) 
+                                    "d" -> help (x+1, y)
+                                    "uf" -> help (x-1, y+1) 
+                                    "ub" -> help (x-1, y-1)
+                                    "df" -> help (x+1, y+1)
+                                    "db" -> help (x+1, y-1)
+  where 
+    (x,y) = getLocation c
+    help loc = head $ filter ((== loc) . getLocation) b
 
 isCellin :: Conwayb -> Cell -> Direction -> Bool
-isCellin (_, h) c d = case d of 
-                                     "f" -> y < h 
-                                     "b" -> y > 1
-                                     "u" -> x > 1
-                                     "d" -> x < h
+isCellin cn@(_, h) c d = case d of 
+                                         "f" -> y < h 
+                                         "b" -> y > 1
+                                         "u" -> x > 1
+                                         "d" -> x < h
+                                         "uf" -> isCellin cn c forwrd && isCellin cn c up
+                                         "ub" -> isCellin cn c bkwrd && isCellin cn c up
+                                         "df" -> isCellin cn c forwrd && isCellin cn c down
+                                         "db" -> isCellin cn c bkwrd && isCellin cn c down
   where (x, y) = getLocation c
 
-neigborF :: Conwayb -> Cell -> Maybe Cell
-neigborF cn c = if isCellin cn c forwrd then Just (getCell cn c forwrd) else Nothing
+neigborInDir :: Conwayb -> Cell -> Direction -> Maybe Cell
+neigborInDir cn c d = if isCellin cn c d then Just (getCell cn c d) else Nothing
 
-neigborB :: Conwayb -> Cell -> Maybe Cell
-neigborB cn c = if isCellin cn c bkwrd then Just (getCell cn c bkwrd) else Nothing
+cellAliveNeighbors :: Conwayb -> Cell -> [Cell]
+cellAliveNeighbors cn c = filter isAlive $ catMaybes $ map (neigborInDir cn c) directions where
+  directions = [forwrd, bkwrd, up, down, upf, upb, downf, downb] 
 
-neigborU :: Conwayb -> Cell -> Maybe Cell
-neigborU cn c = if isCellin cn c up then Just (getCell cn c up) else Nothing
+nxtGen :: Conwayb -> Conwayb
+nxtGen cn@(brd, h) = (help brd, h) where 
+  help [] = []
+  help (c:cs) =  (aoe):(help cs) where 
+    aoe
+      | isAlive c && (nc < 2 || nc > 3) = Empty $ getLocation c
+      | (isAlive c && (nc == 2 || nc == 3)) || ((not $ isAlive c) && nc == 3) = Alive $ getLocation c
+      | otherwise = Empty $ getLocation c
+    nc = length $ cellAliveNeighbors cn c
 
-neigborD :: Conwayb -> Cell -> Maybe Cell
-neigborD cn c = if isCellin cn c down then Just (getCell cn c down) else Nothing
+
+
+
+
+
+
+
